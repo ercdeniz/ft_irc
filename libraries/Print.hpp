@@ -3,7 +3,7 @@
 // include
 #include <iostream>
 #include <sstream>
-#include <vector>
+#include <sys/socket.h>
 
 // using namespace
 using namespace std;
@@ -19,7 +19,6 @@ enum Color
     WHITE
 };
 
-vector<string> buffer;
 const std::string RESET = "\033[0m";
 const std::string COLORS[] = {
     "\033[31m", // RED
@@ -39,30 +38,26 @@ string convertString(const T &variable)
     return oss.str();
 }
 
-template <class T>
-void printArgs(const T &arg)
+template <typename T>
+void println(const T &variable , int color = WHITE)
 {
-    buffer.push_back(convertString(arg));
-    buffer.push_back("\n");
-    cout << "2" << endl;
+    cout << COLORS[color] << variable << RESET << endl;
 }
 
-template <class T, class... Args>
-void printArgs(const T &arg, const Args &...args)
+template <typename T>
+void print(const T &variable , int color = WHITE)
 {
-    buffer.push_back(convertString(arg));
-    buffer.push_back(" ");
-    printArgs(args...);
-    cout << "2" << endl;
+    cout << COLORS[color] << variable << RESET;
 }
 
-void printlnColor(int color = WHITE)
+template <typename T>
+void printlnErr(const T &variable , int color = WHITE)
 {
-    cout << COLORS[color];
-    for (const string &str : buffer)
-    {
-        cout << str;
-    }
-    cout << RESET;
-    buffer.clear();
+    cerr << COLORS[color] << variable << RESET << endl;
+}
+
+template <typename T>
+void printFd(int fd, const T &variable)
+{
+    send(fd, (convertString(variable) + '\n').c_str(), convertString(variable).length() + 1, 0);
 }

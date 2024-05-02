@@ -21,7 +21,6 @@ int main(int ac, char** av) {
             if (!is_digit(av[1]) || !is_digit(av[2]))
                 throw runtime_error("Port and password must be digits");
             server = new Server(atoi(av[1]), av[2]);
-            cout <<"asdasd "<< server->get_client_count();
             server->start();
         }
         catch(const std::exception& e)
@@ -32,7 +31,7 @@ int main(int ac, char** av) {
     }
     else
     {
-        cout << "Usage: " << av[0] << " <port> <password>" << endl;
+        println("Usage: ./server <port> <password>" + convertString(13423123), RED); 
         return 1;
     }
     return 0;

@@ -1,11 +1,9 @@
 #pragma once
 
-#include <iostream>
-#include <vector>
+#include "Print.hpp"
 #include <cstring>
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <sys/socket.h>
 #include <sys/poll.h>
 
 using namespace std;
@@ -17,12 +15,12 @@ private:
     sockaddr_in _serverAddr;
     pollfd _pollfds[MAX_CLIENTS];
     int _port;
-    int _client_count;
+    int _count;
     string _password;
     
 public:
     Server(int port, string password);
     void start();
-    int get_client_count();
+    int get_count();
 
 };

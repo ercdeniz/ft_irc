@@ -1,0 +1,4 @@
+.objFiles
+.vscode
+ircserv
+*.dSYM

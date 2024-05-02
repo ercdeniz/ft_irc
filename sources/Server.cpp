@@ -7,7 +7,7 @@ Server::Server(int port, string password)
 
 	_port = port;
 	_password = password;
-	_client_count = 0;
+	_count = 0;
 
 	if ((socket_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
 		throw runtime_error("Error creating socket");
@@ -31,9 +31,9 @@ Server::Server(int port, string password)
 	_pollfds[0].events = POLLIN;
 }
 
-int Server::get_client_count()
+int Server::get_count()
 {
-	return _client_count;
+	return _count;
 }
 
 void Server::start()
@@ -49,7 +49,7 @@ void Server::start()
 
 	while (true)
 	{
-		if (_client_count == 0)
+		if (_count == 0)
 			wait = 5000;
 		else
 			wait = -1;
@@ -70,7 +70,7 @@ void Server::start()
 				if (_pollfds[i].fd == -1)
 				{
 					_pollfds[i].fd = client_fd;
-					_client_count++;
+					_count++;
 					break;
 				}
 			}
