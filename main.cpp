@@ -31,7 +31,7 @@ int main(int ac, char** av) {
     }
     else
     {
-        println("Usage: ./server <port> <password>" + convertString(13423123), RED); 
+        println("Usage: ./server <port> <password>", RED); 
         return 1;
     }
     return 0;

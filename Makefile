@@ -159,6 +159,7 @@ clean:
 
 fclean: clean
 	@$(RM) $(NAME)
+	@$(RM) *.dSYM
 	@echo "\033[92m    - Cleanup Over.✅\033[0m"
 	@sleep 0.3
 	@clear
