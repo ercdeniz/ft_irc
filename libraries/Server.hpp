@@ -15,12 +15,12 @@ private:
     sockaddr_in _serverAddr;
     pollfd _pollfds[MAX_CLIENTS];
     int _port;
-    int _count;
+    int _clientCount;
     string _password;
     
 public:
     Server(int port, string password);
+    void socketGenerate();
     void start();
-    int get_count();
 
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Server.hpp"
+
 class Client
 {
     private:

@@ -1,13 +1,9 @@
 #include "../libraries/Server.hpp"
 
-Server::Server(int port, string password)
+void Server::socketGenerate()
 {
 	int socket_fd;
 	int opt = 1;
-
-	_port = port;
-	_password = password;
-	_count = 0;
 
 	if ((socket_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
 		throw runtime_error("Error creating socket");
@@ -17,7 +13,7 @@ Server::Server(int port, string password)
 
 	_serverAddr.sin_family = AF_INET;
 	_serverAddr.sin_port = htons(_port);
-	_serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	_serverAddr.sin_addr.s_addr = INADDR_ANY;
 
 	if (::bind(socket_fd, (sockaddr *)&_serverAddr, sizeof(_serverAddr)) == -1)
 		throw runtime_error("Error binding socket");
@@ -25,22 +21,24 @@ Server::Server(int port, string password)
 	if (listen(socket_fd, MAX_CLIENTS) == -1)
 		throw runtime_error("Error listening on socket");
 
-	cout << "Server started on port " << _port << endl;
+	println("Server started on port: " + convertString(_port), GREEN);
 
 	_pollfds[0].fd = socket_fd;
 	_pollfds[0].events = POLLIN;
 }
 
-int Server::get_count()
+Server::Server(int port, string password)
 {
-	return _count;
+	_port = port;
+	_password = password;
+	socketGenerate();
+	_clientCount = 0;
 }
 
 void Server::start()
 {
-	int client_fd;
-	int wait;
-	int i;
+	int client_fd, status, i, wait;
+
 	for (i = 1; i < MAX_CLIENTS; i++)
 	{
 		_pollfds[i].fd = -1;
@@ -49,12 +47,15 @@ void Server::start()
 
 	while (true)
 	{
-		if (_count == 0)
+		if (_clientCount == 0)
 			wait = 5000;
 		else
 			wait = -1;
-
-		poll(_pollfds, MAX_CLIENTS, wait);
+		status = poll(_pollfds, MAX_CLIENTS, wait);
+		if (status == 0)
+			throw runtime_error("Timeout");
+		if (status == -1)
+			throw runtime_error("Error polling");
 		if (_pollfds[0].revents)
 		{
 			if ((client_fd = accept(_pollfds[0].fd, NULL, NULL)) == -1)
@@ -70,7 +71,8 @@ void Server::start()
 				if (_pollfds[i].fd == -1)
 				{
 					_pollfds[i].fd = client_fd;
-					_count++;
+					println("Client connected.\n fd: " + convertString(i), GREEN);
+					_clientCount++;
 					break;
 				}
 			}
