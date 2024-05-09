@@ -6,16 +6,22 @@ RM			= rm -rf
 
 OBJDIR = .objFiles
 
-FILES		= main ./sources/Server ./sources/Client
+FILES		= main ./sources/Server ./commands/QUIT ./commands/PASS
 
 SRC			= $(FILES:=.cpp)
 OBJ			= $(addprefix $(OBJDIR)/, $(FILES:=.o))
+
+GITIGNORE_PATH := .gitignore
+GITIGNORE_EXISTS := $(shell grep -Fxq "$(NAME)" $(GITIGNORE_PATH) && echo "yes" || echo "no")
 
 all: $(NAME)
 
 $(NAME): $(OBJ)
 	@echo "\n\033[92m   - Compiling $(NAME)...\033[0m"
 	@$(CC) $(OBJ) -o $(NAME)
+	@if [ "$(GITIGNORE_EXISTS)" = "no" ]; then \
+		echo $(NAME) >> $(GITIGNORE_PATH); \
+	fi
 	@printf "\n\033[92m   Working... \033[0m\n  "
 	@printf "\033[92m █"
 	@sleep 0.001

@@ -9,6 +9,16 @@ bool is_digit(string str)
     return true;
 }
 
+Server *server = NULL;
+
+void singalHandler(int signum)
+{
+    delete server;
+    server = NULL;
+    println("\nSignal received: " + to_string(signum), RED);
+    exit(signum);
+}
+
 int main(int ac, char** av) {
 
     if(ac == 3)
@@ -17,7 +27,8 @@ int main(int ac, char** av) {
         {
             if (!is_digit(av[1]) || !is_digit(av[2]))
                 throw runtime_error("Port and password must be digits");
-            Server *server = new Server(atoi(av[1]), av[2]);
+            server = new Server(atoi(av[1]), av[2]);
+            signal(SIGINT, singalHandler);
             server->start();
         }
         catch(const std::exception& e)

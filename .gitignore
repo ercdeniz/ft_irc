@@ -1,4 +1,4 @@
-.objFiles
-.vscode
 ircserv
-*.dSYM
+.vscode
+.objFiles
+.dSYM

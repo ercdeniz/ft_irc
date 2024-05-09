@@ -37,12 +37,14 @@ Server::Server(int port, string password)
 
 void Server::start()
 {
-	int client_fd, status, i, wait;
+	int client_fd, status, i, wait, bytes;
+	char buf[BUFFER + 1];
 
 	for (i = 1; i < MAX_CLIENTS; i++)
 	{
 		_pollfds[i].fd = -1;
 		_pollfds[i].events = POLLIN;
+		//client eklenecek
 	}
 
 	while (true)
@@ -52,8 +54,10 @@ void Server::start()
 		else
 			wait = -1;
 		status = poll(_pollfds, MAX_CLIENTS, wait);
-		if (status == 0)
+		if (status == 0){
+			delete this;
 			throw runtime_error("Timeout");
+		}
 		if (status == -1)
 			throw runtime_error("Error polling");
 		if (_pollfds[0].revents)
@@ -65,17 +69,63 @@ void Server::start()
 			{
 				if (i == MAX_CLIENTS)
 				{
+					printFd(client_fd, "Server is full");
 					close(client_fd);
 					throw runtime_error("Server is full");
 				}
 				if (_pollfds[i].fd == -1)
 				{
 					_pollfds[i].fd = client_fd;
-					println("Client connected.\n fd: " + convertString(i), GREEN);
+					println("Client connected.\n	fd: " + convertString(client_fd), GREEN);
 					_clientCount++;
 					break;
 				}
 			}
 		}
+		for (i = 1; i < MAX_CLIENTS; i++)
+		{
+			if (_pollfds[i].revents)
+			{
+				bytes = recv(_pollfds[i].fd, buf, BUFFER, 0);
+				if (bytes <= 0)
+					QUIT(i);
+				else
+				{
+					buf[bytes] = '\0';
+					handleCommand(i, buf);
+				}
+			}
+		}
 	}
+}
+
+string toUpper(const string& str) {
+    string result = str;
+    transform(result.begin(), result.end(), result.begin(), ::toupper);
+    return result;
+}
+
+vector<string> splitString(const string& str, char delimiter) {
+    vector<string> tokens;
+    stringstream ss(str);
+    string token;
+    while (getline(ss, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
+void Server::handleCommand(int i, char *buf)
+{
+
+	string command = toUpper(string(buf));
+	vector<string> args = splitString(command, ' ');
+	if (!args[0].compare(0, 4, "QUIT")|| !args[0].compare(0, 4, "EXIT"))
+		QUIT(i);
+	else if (!args[0].compare(0, 4, "PASS"))
+		PASS(i, args);
+	else if (!args[0].compare(0, 4, "USER"))
+		println("user");
+	if (command.length())
+		handleCommand(i, buf);
 }
