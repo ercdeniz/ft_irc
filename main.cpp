@@ -13,9 +13,9 @@ Server *server = NULL;
 
 void singalHandler(int signum)
 {
+    println("\nSignal received: " + to_string(signum), RED);
     delete server;
     server = NULL;
-    println("\nSignal received: " + to_string(signum), RED);
     exit(signum);
 }
 

@@ -6,11 +6,13 @@
 #include <arpa/inet.h>
 #include <sys/poll.h>
 #include <vector>
+#include "Client.hpp"
 
 using namespace std;
 
 #define BUFFER 1000000
 #define MAX_CLIENTS 10
+class Client;
 class Server
 {
 private:
@@ -20,6 +22,7 @@ private:
     int _clientCount;
     string _password;
 public:
+    vector<Client> clients;
     Server(int port, string password);
     void socketGenerate();
     void start();

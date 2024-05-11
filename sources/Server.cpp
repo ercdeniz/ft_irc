@@ -50,7 +50,7 @@ void Server::start()
 	while (true)
 	{
 		if (_clientCount == 0)
-			wait = 5000;
+			wait = 500000;
 		else
 			wait = -1;
 		status = poll(_pollfds, MAX_CLIENTS, wait);
@@ -75,14 +75,17 @@ void Server::start()
 				}
 				if (_pollfds[i].fd == -1)
 				{
+					Client client = Client();
 					_pollfds[i].fd = client_fd;
-					println("Client connected.\n	fd: " + convertString(client_fd), GREEN);
+					println("Client connected!\n-> fd: " + convertString(client_fd), GREEN);
+					printFd(client_fd, "Welcome to the server", MAGENTA);
+					clients.push_back(client);
 					_clientCount++;
 					break;
 				}
 			}
 		}
-		for (i = 1; i < MAX_CLIENTS; i++)
+		for (i = 1; i <= _clientCount; i++)
 		{
 			if (_pollfds[i].revents)
 			{
@@ -95,6 +98,10 @@ void Server::start()
 					handleCommand(i, buf);
 				}
 			}
+			else
+				continue;
+				
+
 		}
 	}
 }
@@ -117,15 +124,19 @@ vector<string> splitString(const string& str, char delimiter) {
 
 void Server::handleCommand(int i, char *buf)
 {
-
+	if(!buf)
+		return;
 	string command = toUpper(string(buf));
 	vector<string> args = splitString(command, ' ');
-	if (!args[0].compare(0, 4, "QUIT")|| !args[0].compare(0, 4, "EXIT"))
+	if (!args[0].compare(0, args[0].length(), "QUIT")|| !args[0].compare(0, args[0].length(), "EXIT"))
 		QUIT(i);
-	else if (!args[0].compare(0, 4, "PASS"))
+	else if (!args[0].compare(0, args[0].length(), "PASS"))
 		PASS(i, args);
-	else if (!args[0].compare(0, 4, "USER"))
+	else if (!args[0].compare(0, args[0].length(), "USER"))
 		println("user");
-	if (command.length())
-		handleCommand(i, buf);
+	else
+	{
+		println("buf: " + string(buf), RED);
+	
+	}
 }

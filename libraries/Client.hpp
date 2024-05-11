@@ -5,7 +5,12 @@
 class Client
 {
     private:
-        string _password;
+        string _username;
+        string _nickname;
+        bool _hasPass;
+
     public:
         Client();
+        void setHasPass(bool hasPass);
+        bool getHasPass() const;
 };
