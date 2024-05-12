@@ -44,17 +44,17 @@ void Server::start()
 	{
 		_pollfds[i].fd = -1;
 		_pollfds[i].events = POLLIN;
-		//client eklenecek
 	}
 
 	while (true)
 	{
 		if (_clientCount == 0)
-			wait = 500000;
+			wait = 15000;
 		else
 			wait = -1;
 		status = poll(_pollfds, MAX_CLIENTS, wait);
-		if (status == 0){
+		if (status == 0)
+		{
 			delete this;
 			throw runtime_error("Timeout");
 		}
@@ -78,14 +78,14 @@ void Server::start()
 					Client client = Client();
 					_pollfds[i].fd = client_fd;
 					println("Client connected!\n-> fd: " + convertString(client_fd), GREEN);
-					printFd(client_fd, "Welcome to the server", MAGENTA);
+					printFd(client_fd, "Welcome to the S.E.N. IRC Server", MAGENTA);
 					clients.push_back(client);
 					_clientCount++;
 					break;
 				}
 			}
 		}
-		for (i = 1; i <= _clientCount; i++)
+		for (i = 1; i <= MAX_CLIENTS; i++)
 		{
 			if (_pollfds[i].revents)
 			{
@@ -98,45 +98,62 @@ void Server::start()
 					handleCommand(i, buf);
 				}
 			}
-			else
-				continue;
-				
-
 		}
 	}
 }
 
-string toUpper(const string& str) {
-    string result = str;
-    transform(result.begin(), result.end(), result.begin(), ::toupper);
-    return result;
+string toUpper(const string &str)
+{
+	string result = str;
+	transform(result.begin(), result.end(), result.begin(), ::toupper);
+	return result;
 }
 
-vector<string> splitString(const string& str, char delimiter) {
-    vector<string> tokens;
-    stringstream ss(str);
-    string token;
-    while (getline(ss, token, delimiter)) {
-        tokens.push_back(token);
-    }
-    return tokens;
+vector<string> splitString(const string &str, char delimiter)
+{
+	vector<string> tokens;
+	stringstream ss(str);
+	string token;
+	while (getline(ss, token, delimiter))
+	{
+		tokens.push_back(token);
+	}
+	return tokens;
 }
 
 void Server::handleCommand(int i, char *buf)
 {
-	if(!buf)
+	if (!buf)
 		return;
+	size_t len;
 	string command = toUpper(string(buf));
-	vector<string> args = splitString(command, ' ');
-	if (!args[0].compare(0, args[0].length(), "QUIT")|| !args[0].compare(0, args[0].length(), "EXIT"))
-		QUIT(i);
-	else if (!args[0].compare(0, args[0].length(), "PASS"))
-		PASS(i, args);
-	else if (!args[0].compare(0, args[0].length(), "USER"))
-		println("user");
-	else
-	{
-		println("buf: " + string(buf), RED);
+
+	if (command.find("\r") != string::npos)
+		clients[i - 1].setIsNc(false);
 	
+	if (!(clients[i - 1].getIsNc()))
+	{
+		command.erase(remove(command.begin(), command.end(), '\r'), command.end());
 	}
+
+	vector<string> args = splitString(command, ' ');
+
+	if (args.size() == 1)
+		len = args[0].length() - 1;
+	else
+		len = args[0].length();
+
+	if (!args[0].compare(0, len, "PASS"))
+		PASS(i, args);
+	else if (!args[0].compare(0, len, "QUIT") || !args[0].compare(0, len, "EXIT"))
+			QUIT(i);
+	else if (clients[i - 1].getHasPass())
+	{
+		if (!args[0].compare(0, len, "USER"))
+			println("user");
+		else
+			println("buf: " + string(buf), RED);
+	}
+	else
+		printFd(_pollfds[i].fd, "Enter password first", RED);
 }
