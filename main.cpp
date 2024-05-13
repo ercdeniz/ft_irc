@@ -11,9 +11,16 @@ bool is_digit(string str)
 
 Server *server = NULL;
 
+void Server::sendMessage(int index)
+{
+    printFd(_pollfds[index].fd, "Server shutting down...", RED);
+}
+
 void singalHandler(int signum)
 {
     println("\nSignal received: " + to_string(signum), RED);
+    for (int i = 0; i < MAX_CLIENTS; i++)
+        server->sendMessage(i);
     delete server;
     server = NULL;
     exit(signum);
@@ -34,7 +41,7 @@ int main(int ac, char** av) {
         }
         catch(const std::exception& e)
         {
-            printlnErr(e.what(), RED);
+            printlnErr(string(e.what()) + ": " + strerror(errno), RED);
         }
         
     }

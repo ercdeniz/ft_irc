@@ -7,11 +7,13 @@
 #include <sys/poll.h>
 #include <vector>
 #include "Client.hpp"
+#include <string.h>
+#include <errno.h>
 
 using namespace std;
 
 #define BUFFER 1000000
-#define MAX_CLIENTS 10
+#define MAX_CLIENTS 3 + 1 // client + server
 class Client;
 class Server
 {
@@ -26,14 +28,17 @@ public:
     Server(int port, string password);
     void socketGenerate();
     void start();
-    void handleCommand(int i, char *buf);
+    void isRevent();
+    void receiveData();
+    void handleCommand(int fdIndex, char *buf);
     //commands
-    void QUIT(int i);
-    void PASS(int i, vector<string> args);
-    void USER(int i, vector<string> args);
-    void NICK(int i, vector<string> args);
+    void QUIT(int fdIndex);
+    void PASS(int fdIndex, vector<string> args);
+    void USER(int fdIndex, vector<string> args);
+    void NICK(int fdIndex, vector<string> args);
 
     // utils
+    void sendMessage(int index);
     static string trim(const string& str, const string& whitespaces);
     static vector<string> splitString(const string &str, char delimiter);
     static string toUpper(const string &str);

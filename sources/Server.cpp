@@ -1,5 +1,13 @@
 #include "../libraries/Server.hpp"
 
+Server::Server(int port, string password)
+{
+	_port = port;
+	_password = password;
+	socketGenerate();
+	_clientCount = 0;
+}
+
 void Server::socketGenerate()
 {
 	int socket_fd;
@@ -27,20 +35,65 @@ void Server::socketGenerate()
 	_pollfds[0].events = POLLIN;
 }
 
-Server::Server(int port, string password)
+void Server::isRevent()
 {
-	_port = port;
-	_password = password;
-	socketGenerate();
-	_clientCount = 0;
+	int client_fd;
+
+	if (_pollfds[0].revents)
+	{
+		if ((client_fd = accept(_pollfds[0].fd, NULL, NULL)) == -1)
+			throw runtime_error("Error accepting client");
+
+		for (int i = 1; i <= MAX_CLIENTS; i++)
+		{
+			if (i == MAX_CLIENTS)
+			{
+				printFd(client_fd, "Sory, server is full", BLUE);
+				println("Server is full\n-> fd: " + convertString(client_fd), BLUE);
+				close(client_fd);
+				return;
+			}
+			if (_pollfds[i].fd == -1)
+			{
+				Client client = Client();
+				_pollfds[i].fd = client_fd;
+				println("Client connected!\n-> fd: " + convertString(client_fd), GREEN);
+				printFd(client_fd, "Welcome to the S.E.N. IRC Server", MAGENTA);
+				clients.push_back(client);
+				_clientCount++;
+				break;
+			}
+		}
+	}
+}
+
+void Server::receiveData()
+{
+	int bytes;
+	char buf[BUFFER + 1];
+
+	for (int i = 1; i <= MAX_CLIENTS; i++)
+	{
+		if (_pollfds[i].revents)
+		{
+			bytes = recv(_pollfds[i].fd, buf, BUFFER, 0);
+			if (bytes <= 0)
+				QUIT(i);
+			else
+			{
+				buf[bytes] = '\0';
+				handleCommand(i, buf);
+			}
+		}
+	}
 }
 
 void Server::start()
 {
-	int client_fd, status, i, wait, bytes;
-	char buf[BUFFER + 1];
+	int status, wait;
 
-	for (i = 1; i < MAX_CLIENTS; i++)
+	// Initialize pollfds
+	for (int i = 1; i <= MAX_CLIENTS; i++)
 	{
 		_pollfds[i].fd = -1;
 		_pollfds[i].events = POLLIN;
@@ -56,87 +109,45 @@ void Server::start()
 		if (status == 0)
 		{
 			delete this;
+			errno = ETIMEDOUT;
 			throw runtime_error("Timeout");
 		}
 		if (status == -1)
 			throw runtime_error("Error polling");
-		if (_pollfds[0].revents)
-		{
-			if ((client_fd = accept(_pollfds[0].fd, NULL, NULL)) == -1)
-				throw runtime_error("Error accepting client");
-
-			for (i = 1; i < MAX_CLIENTS; i++)
-			{
-				if (i == MAX_CLIENTS)
-				{
-					printFd(client_fd, "Server is full");
-					close(client_fd);
-					throw runtime_error("Server is full");
-				}
-				if (_pollfds[i].fd == -1)
-				{
-					Client client = Client();
-					_pollfds[i].fd = client_fd;
-					println("Client connected!\n-> fd: " + convertString(client_fd), GREEN);
-					printFd(client_fd, "Welcome to the S.E.N. IRC Server", MAGENTA);
-					clients.push_back(client);
-					_clientCount++;
-					break;
-				}
-			}
-		}
-		for (i = 1; i <= MAX_CLIENTS; i++)
-		{
-			if (_pollfds[i].revents)
-			{
-				bytes = recv(_pollfds[i].fd, buf, BUFFER, 0);
-				if (bytes <= 0)
-					QUIT(i);
-				else
-				{
-					buf[bytes] = '\0';
-					handleCommand(i, buf);
-				}
-			}
-		}
+		isRevent();
+		receiveData();
 	}
 }
 
-void Server::handleCommand(int i, char *buf)
+void Server::handleCommand(int fdIndex, char *buf)
 {
-	if (!buf)
-		return;
-	size_t len;
-	string command = toUpper(string(buf));
+	string bufStr(buf);
+	if (bufStr.find("\r") != string::npos)
+		clients[fdIndex - 1].setIsNc(false);
 
-	if (command.find("\r") != string::npos)
-		clients[i - 1].setIsNc(false);
+	vector<string> args = splitString(trim(buf, "\r\n"), ' ');
 
-	if (!(clients[i - 1].getIsNc()))
-		command.erase(remove(command.begin(), command.end(), '\r'), command.end());
+	string command = toUpper(args[0]);
 
-	vector<string> args = splitString(command, ' ');
+	cout << "Command: " << command << endl;
 
-	if (args.size() == 1)
-		len = args[0].length() - 1;
-	else
-		len = args[0].length();
+	size_t len = command.length();
 
-	if (!args[0].compare(0, len, "PASS"))
-		PASS(i, args);
-	else if (!args[0].compare(0, len, "QUIT") || !args[0].compare(0, len, "EXIT"))
-		QUIT(i);
-	else if (clients[i - 1].getHasPass())
+	if (!command.compare(0, len, "PASS"))
+		PASS(fdIndex, args);
+	else if (!command.compare(0, len, "QUIT") || !command.compare(0, len, "EXIT"))
+		QUIT(fdIndex);
+	else if (clients[fdIndex - 1].getHasPass())
 	{
-		if (!(args[0].compare(0, len, "USER")))
-			USER(i, args);
-		else if (!(args[0].compare(0, len, "NICK")))
-			NICK(i, args);
-		else if (!clients[i - 1].getNickname().empty() && !clients[i - 1].getUsername().empty())
-			println(clients[i - 1].getNickname() + ": " + convertString(buf), RED);
+		if (!(command.compare(0, len, "USER")))
+			USER(fdIndex, args);
+		else if (!(command.compare(0, len, "NICK")))
+			NICK(fdIndex, args);
+		else if (!clients[fdIndex - 1].getNickname().empty() && !clients[fdIndex - 1].getUsername().empty())
+			println(clients[fdIndex - 1].getNickname() + ": " + convertString(buf), RED);
 		else
-			printFd(_pollfds[i].fd, "Enter nickname and username first", RED);
+			printFd(_pollfds[fdIndex].fd, "Enter nickname and username first", RED);
 	}
 	else
-		printFd(_pollfds[i].fd, "Enter password first", RED);
+		printFd(_pollfds[fdIndex].fd, "Enter password first", RED);
 }
