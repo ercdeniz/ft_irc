@@ -102,25 +102,6 @@ void Server::start()
 	}
 }
 
-string toUpper(const string &str)
-{
-	string result = str;
-	transform(result.begin(), result.end(), result.begin(), ::toupper);
-	return result;
-}
-
-vector<string> splitString(const string &str, char delimiter)
-{
-	vector<string> tokens;
-	stringstream ss(str);
-	string token;
-	while (getline(ss, token, delimiter))
-	{
-		tokens.push_back(token);
-	}
-	return tokens;
-}
-
 void Server::handleCommand(int i, char *buf)
 {
 	if (!buf)
@@ -130,11 +111,9 @@ void Server::handleCommand(int i, char *buf)
 
 	if (command.find("\r") != string::npos)
 		clients[i - 1].setIsNc(false);
-	
+
 	if (!(clients[i - 1].getIsNc()))
-	{
 		command.erase(remove(command.begin(), command.end(), '\r'), command.end());
-	}
 
 	vector<string> args = splitString(command, ' ');
 
@@ -146,13 +125,17 @@ void Server::handleCommand(int i, char *buf)
 	if (!args[0].compare(0, len, "PASS"))
 		PASS(i, args);
 	else if (!args[0].compare(0, len, "QUIT") || !args[0].compare(0, len, "EXIT"))
-			QUIT(i);
+		QUIT(i);
 	else if (clients[i - 1].getHasPass())
 	{
-		if (!args[0].compare(0, len, "USER"))
-			println("user");
+		if (!(args[0].compare(0, len, "USER")))
+			USER(i, args);
+		else if (!(args[0].compare(0, len, "NICK")))
+			NICK(i, args);
+		else if (!clients[i - 1].getNickname().empty() && !clients[i - 1].getUsername().empty())
+			println(clients[i - 1].getNickname() + ": " + convertString(buf), RED);
 		else
-			println("buf: " + string(buf), RED);
+			printFd(_pollfds[i].fd, "Enter nickname and username first", RED);
 	}
 	else
 		printFd(_pollfds[i].fd, "Enter password first", RED);

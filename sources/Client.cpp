@@ -8,6 +8,26 @@ Client::Client()
     _isNc = true;
 }
 
+void Client::setUsername(string username)
+{
+    _username = username;
+}
+
+string Client::getUsername() const
+{
+    return _username;
+}
+
+void Client::setNickname(string nickname)
+{
+    _nickname = nickname;
+}
+
+string Client::getNickname() const
+{
+    return _nickname;
+}
+
 void Client::setHasPass(bool hasPass)
 {
     _hasPass = hasPass;

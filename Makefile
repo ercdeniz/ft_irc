@@ -1,12 +1,19 @@
 NAME    = ircserv
 
 CC			= c++
-FLAGS		= -Wall -Wextra -Werror -std=c++98 -g
+FLAGS		= -Wall -Wextra -Werror -std=c++98 
 RM			= rm -rf
 
 OBJDIR = .objFiles
 
-FILES		= main ./sources/Server ./commands/QUIT ./commands/PASS ./sources/Client
+FILES		= 	./main \
+				./sources/Server \
+				./sources/Client \
+				./sources/Utils \
+				./commands/QUIT \
+				./commands/PASS \
+				./commands/NICK \
+				./commands/USER 
 
 SRC			= $(FILES:=.cpp)
 OBJ			= $(addprefix $(OBJDIR)/, $(FILES:=.o))

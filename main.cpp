@@ -29,6 +29,7 @@ int main(int ac, char** av) {
                 throw runtime_error("Port and password must be digits");
             server = new Server(atoi(av[1]), av[2]);
             signal(SIGINT, singalHandler);
+            signal(SIGTSTP, singalHandler);
             server->start();
         }
         catch(const std::exception& e)

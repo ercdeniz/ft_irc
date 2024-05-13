@@ -30,5 +30,11 @@ public:
     //commands
     void QUIT(int i);
     void PASS(int i, vector<string> args);
+    void USER(int i, vector<string> args);
+    void NICK(int i, vector<string> args);
 
+    // utils
+    static string trim(const string& str, const string& whitespaces);
+    static vector<string> splitString(const string &str, char delimiter);
+    static string toUpper(const string &str);
 };

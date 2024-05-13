@@ -6,6 +6,8 @@ void Server::QUIT(int i)
 	printFd(_pollfds[i].fd, "Goodbye!", RED);
 	close(_pollfds[i].fd);
 	clients[i - 1].setHasPass(false);
+	clients[i - 1].setUsername("");
+	clients[i - 1].setNickname("");
 	_pollfds[i].fd = -1;
 	_clientCount--;
 }
