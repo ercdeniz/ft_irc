@@ -21,10 +21,10 @@ private:
     sockaddr_in _serverAddr;
     pollfd _pollfds[MAX_CLIENTS];
     int _port;
-    int _clientCount;
+    size_t _clientCount;
     string _password;
 public:
-    vector<Client> clients;
+    vector<Client*> clients;
     vector<Channel> channelsServer;
     Server(int port, string password);
     void socketGenerate();

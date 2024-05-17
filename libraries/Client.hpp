@@ -18,7 +18,7 @@ class Client
         bool _isNc;
 
     public:
-        vector<Channel> channelsClient;
+        vector<string> channelNames;
         Client() : _username(""), _nickname(""), _hasPass(false), _isNc(true) {}
         void setUsername(string username) { _username = username; }
         string getUsername() const { return _username; }

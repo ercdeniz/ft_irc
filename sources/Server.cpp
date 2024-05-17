@@ -55,7 +55,7 @@ void Server::isRevent()
 			}
 			if (_pollfds[i].fd == -1)
 			{
-				Client client = Client();
+				Client *client = new Client();
 				_pollfds[i].fd = client_fd;
 				println("Client connected!\n-> fd: " + convertString(client_fd), GREEN);
 				printFd(client_fd, "Welcome to the S.E.N. IRC Server", MAGENTA);
@@ -72,7 +72,7 @@ void Server::receiveData()
 	int bytes;
 	char buf[BUFFER + 1];
 
-	for (int i = 1; i <= MAX_CLIENTS; i++)
+	for (int i = 1; i < MAX_CLIENTS; i++)
 	{
 		if (_pollfds[i].revents)
 		{
@@ -102,15 +102,14 @@ void Server::start()
 	while (true)
 	{
 		if (_clientCount == 0)
-			wait = 15000;
+			wait = 5000;
 		else
 			wait = -1;
 		status = poll(_pollfds, MAX_CLIENTS, wait);
 		if (status == 0)
 		{
-			delete this;
 			errno = ETIMEDOUT;
-			throw runtime_error("Timeout");
+			throw runtime_error("Server connection not found");
 		}
 		if (status == -1)
 			throw runtime_error("Error polling");
@@ -125,7 +124,7 @@ void Server::handleCommand(int fdIndex, char *buf)
 		return;
 	string bufStr(buf);
 	if (bufStr.find("\r") != string::npos)
-		clients[fdIndex - 1].setIsNc(false);
+		clients[fdIndex - 1]->setIsNc(false);
 
 	vector<string> args = splitString(trim(buf, "\r\n"), ' ');
 	if (args.empty())
@@ -138,13 +137,13 @@ void Server::handleCommand(int fdIndex, char *buf)
 		PASS(fdIndex, args);
 	else if (!command.compare("QUIT") || !command.compare("EXIT"))
 		QUIT(fdIndex);
-	else if (clients[fdIndex - 1].getHasPass())
+	else if (clients[fdIndex - 1]->getHasPass())
 	{
 		if (!(command.compare("USER")))
 			USER(fdIndex, args);
 		else if (!(command.compare("NICK")))
 			NICK(fdIndex, args);
-		else if (!clients[fdIndex - 1].getNickname().empty() && !clients[fdIndex - 1].getUsername().empty())
+		else if (!clients[fdIndex - 1]->getNickname().empty() && !clients[fdIndex - 1]->getUsername().empty())
 			otherCommands(fdIndex, args);			
 		else
 			printFd(_pollfds[fdIndex].fd, "Enter nickname and username first", RED);

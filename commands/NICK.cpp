@@ -1,25 +1,25 @@
 #include "../libraries/Server.hpp"
 
-void Server::NICK(int i, vector<string> args)
+void Server::NICK(int fdIndex, vector<string> args)
 {
-    if(!clients[i - 1].getNickname().empty())
+    if(!clients[fdIndex - 1]->getNickname().empty())
     {
-        printFd(_pollfds[i].fd, "You already have a nickname", CYAN);
+        printFd(_pollfds[fdIndex].fd, "You already have a nickname", CYAN);
         return;
     }
     if(args.size() != 2)
     {
-        printFd(_pollfds[i].fd, "Usage: NICK <nickname>", RED);
+        printFd(_pollfds[fdIndex].fd, "Usage: NICK <nickname>", RED);
         return;
     }
-    for (int x = 0; x <= i; x++)
+    for (size_t i = 0; i < _clientCount; i++)
     {
-        if(!args[1].compare(clients[x -1].getNickname()))
+        if(!args[1].compare(clients[i]->getNickname()))
         {
-            printFd(_pollfds[i].fd, "out of use nick", RED);
+            printFd(_pollfds[fdIndex].fd, "out of use nick", RED);
             return;
         }
     }
-    clients[i - 1].setNickname(trim(args[1], "\n"));
-    printFd(_pollfds[i].fd, "Nickname accepted", GREEN);
+    clients[fdIndex - 1]->setNickname(trim(args[1], "\n"));
+    printFd(_pollfds[fdIndex].fd, "Nickname accepted", GREEN);
 }

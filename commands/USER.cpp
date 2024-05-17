@@ -2,7 +2,7 @@
 
 void Server::USER(int fdIndex, vector<string> args)
 {
-    if(!clients[fdIndex - 1].getUsername().empty())
+    if(!clients[fdIndex - 1]->getUsername().empty())
     {
         printFd(_pollfds[fdIndex].fd, "You already have a username", CYAN);
         return;
@@ -12,6 +12,6 @@ void Server::USER(int fdIndex, vector<string> args)
         printFd(_pollfds[fdIndex].fd, "Usage: USER <username>", RED);
         return;
     }
-    clients[fdIndex - 1].setUsername(trim(args[1], "\n"));
+    clients[fdIndex - 1]->setUsername(trim(args[1], "\n"));
     printFd(_pollfds[fdIndex].fd, "Username accepted", GREEN);
 }
