@@ -1,5 +1,34 @@
 #include "../libraries/Server.hpp"
 
+bool is_digit(string str)
+{
+	int len = str.length();
+	for (int i = 0; i < len; i++)
+		if (!isdigit(str[i]))
+			return false;
+	return true;
+}
+
+void Server::argControl(char **av)
+{
+	if (!is_digit(av[1]) || !is_digit(av[2]))
+	{
+		errno = EINVAL;
+		throw invalid_argument("Port and password must be digits");
+	}
+	int port = atoi(av[1]);
+	if (port < 1024 || port > 49151)
+	{
+		errno = EINVAL;
+		throw out_of_range("Port must be between 1024 and 49151");
+	}
+}
+
+void Server::sendMessage(int index)
+{
+	printFd(_pollfds[index].fd, "Server shutting down...", RED);
+}
+
 string Server::trim(const string& str, const string& whitespaces = " \t\n\r\f\v\"\'") {
 	if (str.empty())
 		return str;
@@ -14,21 +43,30 @@ vector<string> Server::splitString(const string &str, char delimiter)
 {
 	vector<string> tokens;
 	string token;
+	int count = 0;
 	bool inQuotes = false;
-	stringstream ss(str);
+	bool validQuotes = true;
 
-	while (getline(ss, token, delimiter))
+	for (size_t i = 0; i <= str.length(); i++)
 	{
-		if (token[0] == '"' && token.back() == '"')
-			tokens.push_back(token.substr(1, token.size() - 2));
-		else if (inQuotes)
-			tokens.back() += delimiter + token;
-		else
+		if (str[i] == '"')
+		{
+			inQuotes = !inQuotes;
+			count++;
+			validQuotes = false;
+			if (count % 2 == 0)
+				validQuotes = true;
+		}
+		else if ((str[i] == delimiter || i == str.length()) && !inQuotes && validQuotes)
 		{
 			tokens.push_back(token);
-			inQuotes = token[0] == '"';
+			token.clear();
 		}
+		else
+			token += str[i];
 	}
+	if (!validQuotes)
+		throw invalid_argument("Invalid number of quotes");
 	return tokens;
 }
 

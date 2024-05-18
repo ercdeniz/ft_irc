@@ -1,20 +1,7 @@
 #include "libraries/Server.hpp"
-
-bool is_digit(string str)
-{
-	int len = str.length();
-	for (int i = 0; i < len; i++)
-		if (!isdigit(str[i]))
-			return false;
-	return true;
-}
+#include <signal.h>
 
 Server *server = NULL;
-
-void Server::sendMessage(int index)
-{
-	printFd(_pollfds[index].fd, "Server shutting down...", RED);
-}
 
 void exitServ()
 {
@@ -24,37 +11,48 @@ void exitServ()
 	server = NULL;
 }
 
-void singalHandler(int signum)
+void signalHandler(int signum)
 {
-	println("\nSignal received: " + to_string(signum), RED);
+	println("\nSignal received: " + convertString(strsignal(signum)), RED);
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		server->sendMessage(i);
 	exitServ();
 	exit(signum);
 }
 
-int main(int ac, char** av) {
+void signalCatcher()
+{
+	struct sigaction sa;
+	sa.sa_handler = signalHandler;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	for (int i = 1; i < NSIG; ++i)
+		if (i != SIGKILL && i != SIGSTOP && i != SIGWINCH)
+			if (signal(i, signalHandler) == SIG_ERR)
+				printlnErr("Signal error: " + convertString(strsignal(i)), RED);
+}
 
-	if(ac == 3)
-	{ 
+int main(int ac, char **av)
+{
+	if (ac == 3)
+	{
 		try
 		{
-			if (!is_digit(av[1]) || !is_digit(av[2]))
-				throw runtime_error("Port and password must be digits");
+			signalCatcher();
+			Server::argControl(av);
 			server = new Server(atoi(av[1]), av[2]);
-			signal(SIGINT, singalHandler);
-			signal(SIGTERM, singalHandler);
 			server->start();
 		}
-		catch(const std::exception& e)
+		catch (const std::exception &e)
 		{
-			printlnErr(string(e.what()) + ": " + strerror(errno), RED);
+			printlnErr(string(strerror(errno)) + ": " + string(e.what()), RED);
 		}
-		exitServ();
+		if (server)
+			exitServ();
 	}
 	else
 	{
-		println("Usage: ./server <port> <password>", RED); 
+		println("Usage: ./server <port> <password>", RED);
 		return 1;
 	}
 	return 0;

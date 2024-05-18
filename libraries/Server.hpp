@@ -41,6 +41,7 @@ public:
     void JOIN(int fdIndex, vector<string> args);
 
     // utils
+    static void argControl(char **av);
     void sendMessage(int index);
     static string trim(const string& str, const string& whitespaces);
     static vector<string> splitString(const string &str, char delimiter);

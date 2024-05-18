@@ -102,7 +102,7 @@ void Server::start()
 	while (true)
 	{
 		if (_clientCount == 0)
-			wait = 5000;
+			wait = 15000;
 		else
 			wait = -1;
 		status = poll(_pollfds, MAX_CLIENTS, wait);
@@ -125,14 +125,17 @@ void Server::handleCommand(int fdIndex, char *buf)
 	string bufStr(buf);
 	if (bufStr.find("\r") != string::npos)
 		clients[fdIndex - 1]->setIsNc(false);
-
-	vector<string> args = splitString(trim(buf, "\r\n"), ' ');
+	vector<string> args;
+	try{
+		args = splitString(trim(buf, "\r\n"), ' ');
+	}
+	catch (const invalid_argument &e){
+		printFd(_pollfds[fdIndex].fd, e.what(), RED);
+		return;
+	}
 	if (args.empty())
 		return;
 	string command = toUpper(args[0]);
-
-	cout << "Command: " << command << endl;
-
 	if (!command.compare("PASS"))
 		PASS(fdIndex, args);
 	else if (!command.compare("QUIT") || !command.compare("EXIT"))
@@ -156,5 +159,5 @@ void Server::otherCommands(int fdIndex, vector<string> args)
 {
 	string command = toUpper(args[0]);
 	if (!command.compare("JOIN"))
-		println(fdIndex, GREEN);
+		JOIN(fdIndex, args);
 }
