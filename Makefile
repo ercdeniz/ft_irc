@@ -93,7 +93,7 @@ $(NAME): $(OBJ)
 	@sleep 0.3
 	@clear
 	@printf "\n\033[96m   Built 🛠 \033[0m\n\n"
-	@echo "	~>\033[4;1;34mS.E.N IRC Server\033[0m<~\n"
+	@echo "	~>\033[4;1;34mS.E.N. IRC Server\033[0m<~\n"
 	@echo "    S. 42 Intra  ~>  \033[4;1;34mhttps://profile.intra.42.fr/users/sekilinc\033[0m\n"
 	@echo "    E. 42 Intra  ~>  \033[4;1;34mhttps://profile.intra.42.fr/users/ercdeniz\033[0m\n"
 	@echo "    N. 42 Intra  ~>  \033[4;1;34mhttps://profile.intra.42.fr/users/nsahinog\033[0m\n"

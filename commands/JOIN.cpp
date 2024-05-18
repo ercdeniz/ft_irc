@@ -28,6 +28,17 @@
  * @param args	JOIN komutunun argümanları (kanal adı ve gerekirse anahtar)
  */
 
+void mapper(const string &channelStr, const string &keyStr, multimap<string, string> &channelKeyMap) {
+    vector<string> channels = Server::splitString(channelStr, ',');
+    vector<string> keys = Server::splitString(keyStr, ',');
+
+    for (size_t i = 0; i < channels.size(); ++i) {
+        string channel = channels[i];
+        string key = (i < keys.size()) ? keys[i] : "";
+		channelKeyMap.insert(pair<string, string>(channel, key));
+    }
+}
+
 void Server::JOIN(int fdIndex, vector<string> args)
 {
 	if (args.size() < 2)
@@ -36,34 +47,35 @@ void Server::JOIN(int fdIndex, vector<string> args)
 		return;
 	}
 
-	string channelName = args[1];
-	string key = args.size() > 2 ? args[2] : "";
+	string channelStr = args[1];
+	string keyStr = args.size() > 2 ? args[2] : "";
 
-	if (channelName.find(',') == string::npos)
+	multimap<string, string> channelsMap;
+	mapper(channelStr, keyStr, channelsMap);
+
+
+	if (channelsMap.size() == 1)
 	{
 		// Tek kanal
-		println("Tek kanal. Kanal adı: " + channelName + ", Anahtar: " + key);
-		
+		for (map<string, string>::iterator it = channelsMap.begin(); it != channelsMap.end(); ++it) 
+			cout << "Kanal adı: " << it->first << ", Anahtar: " << it->second << endl;
 	}
 	else
 	{
 		// Birden fazla kanal
-		vector<string> channels = splitString(channelName, ',');
-		for (size_t i = 0; i < channels.size(); i++)
+		vector<string> errorMessages;
+		for (map<string, string>::iterator it = channelsMap.begin(); it != channelsMap.end(); ++it) 
 		{
-			if (channels[i].find('&') == string::npos && channels[i].find('#') == string::npos)
-			{
-				printFd(_pollfds[fdIndex].fd, "Invalid channel name!\nUsage: &channel or #channel", RED);
-				return;
-			}
-			string name = trim(channels[i], "&#");
-			if (name.find(' ') != string::npos || name.find(',') != string::npos || name.find('\a') != string::npos)
-			{
-				printFd(_pollfds[fdIndex].fd, "Invalid channel name!\nChannel name cannot contain space, comma or control G", RED);
-				return;
-			}
-
+			const string &channelName = it->first;
+			if (channelName.length() > 200)
+				errorMessages.push_back("Channel name must be at most 200 characters");
+			if (channelName.find('#') == string::npos && channelName.find('&') == string::npos)
+				errorMessages.push_back("Channel name must start with '#' or '&'");
+			if (channelName.find(' ') != string::npos || channelName.find(',') != string::npos || channelName.find('\a') != string::npos)
+				errorMessages.push_back("Channel name cannot contain ' ', ',' or '\\a'" );
+			for (size_t i = 0; i < errorMessages.size(); ++i)
+				printFd(_pollfds[fdIndex].fd, errorMessages[i], RED);
 		}
-		println("Birden fazla kanal. Kanal adları: " + channelName + ", Anahtarlar: " + key);
+		
 	}
 }

@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <sys/poll.h>
 #include <vector>
+#include <map>
 #include <string.h>
 #include <errno.h>
 
@@ -25,7 +26,7 @@ private:
     string _password;
 public:
     vector<Client*> clients;
-    vector<Channel> channelsServer;
+    vector<Channel> _channels;
     Server(int port, string password);
     void socketGenerate();
     void start();

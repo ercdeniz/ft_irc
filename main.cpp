@@ -26,8 +26,16 @@ void signalCatcher()
 	sa.sa_handler = signalHandler;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
+
+	vector<int> ignoredSignals;
+    ignoredSignals.push_back(SIGKILL);
+    ignoredSignals.push_back(SIGSTOP);
+    ignoredSignals.push_back(SIGWINCH);
+    ignoredSignals.push_back(SIGUSR1);
+    ignoredSignals.push_back(SIGUSR2);
+
 	for (int i = 1; i < NSIG; ++i)
-		if (i != SIGKILL && i != SIGSTOP && i != SIGWINCH)
+		if (find(ignoredSignals.begin(), ignoredSignals.end(), i) == ignoredSignals.end())
 			if (signal(i, signalHandler) == SIG_ERR)
 				printlnErr("Signal error: " + convertString(strsignal(i)), RED);
 }
@@ -43,7 +51,7 @@ int main(int ac, char **av)
 			server = new Server(atoi(av[1]), av[2]);
 			server->start();
 		}
-		catch (const std::exception &e)
+		catch (const exception &e)
 		{
 			printlnErr(string(strerror(errno)) + ": " + string(e.what()), RED);
 		}

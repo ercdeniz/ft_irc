@@ -2,4 +2,3 @@ ircserv
 .vscode
 .objFiles
 *.dSYM
-*.pyc
