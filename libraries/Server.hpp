@@ -40,6 +40,7 @@ public:
     void USER(int fdIndex, vector<string> args);
     void NICK(int fdIndex, vector<string> args);
     void JOIN(int fdIndex, vector<string> args);
+    void KICK(int fdIndex, vector<string> args);
 
     // utils
     static void argControl(char **av);

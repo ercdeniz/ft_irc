@@ -56,6 +56,14 @@ bool hasChannel(const string &channelName, const vector<Channel> &channels, int 
 	return false;
 }
 
+bool hasInclude(const string channelName, vector<string> channels)
+{
+	for (size_t i = 0; i < channels.size(); ++i)
+		if (!channels[i].compare(channelName))
+			return true;
+	return false;
+}
+
 void Server::JOIN(int fdIndex, vector<string> args)
 {
 	if (args.size() < 2 || args.size() > 3)
@@ -71,7 +79,7 @@ void Server::JOIN(int fdIndex, vector<string> args)
 	mapper(channelStr, keyStr, channelsMap);
 
 	vector<string> errorMessages;
-	for (map<string, string>::iterator it = channelsMap.begin(); it != channelsMap.end(); ++it)
+	for (map<string, string>::iterator it = channelsMap.begin(); it != channelsMap.end();  ++it)
 	{
 		const string &channelName = it->first;
 		if (channelName.length() > 200 || channelName.length() == 0)
@@ -81,19 +89,27 @@ void Server::JOIN(int fdIndex, vector<string> args)
 		if (channelName.find(' ') != string::npos || channelName.find(',') != string::npos || channelName.find('\a') != string::npos)
 			errorMessages.push_back("Channel name cannot contain ' ', ',' or '\\a'");
 		int index = -1;
-		if (_channels.size() != 0 && hasChannel(channelName, _channels, &index))
+		bool existsInClient = hasInclude(trim(channelName, "&#"), clients[fdIndex - 1]->clientChannels);
+		if (_channels.size() != 0 && hasChannel(channelName, _channels, &index)) // channel exists
 		{
-			if (_channels[index].getChannelPassword().compare(it->second))
-				errorMessages.push_back("Wrong password");
-			if (_channels[index]._channelClients[fdIndex - 1] == clients[fdIndex - 1])
-				errorMessages.push_back("Already joined");
 			if (_channels[index].getLimit() != -1 && _channels[index]._channelClients.size() >= size_t(_channels[index].getLimit()))
 				errorMessages.push_back("Channel is full");
+			if (_channels[index].getChannelPassword().compare(it->second))
+				errorMessages.push_back("Wrong password");
+			if (_channels[index]._channelClients[fdIndex - 1] == clients[fdIndex - 1] && existsInClient)
+				errorMessages.push_back("Already joined");
+			else
+			{
+				clients[fdIndex - 1]->clientChannels.push_back(trim(channelName, "&#"));
+				printFd(_pollfds[fdIndex].fd, "Joined channel: " + channelName, GREEN);
+				return;
+			}
 		}
-		if (errorMessages.size() == 0)
+		if (errorMessages.size() == 0) // channel does not exist
 		{
 			_channels.push_back(Channel(channelName, it->second));
 			_channels[_channels.size() - 1]._channelClients.push_back(clients[fdIndex - 1]);
+			clients[fdIndex - 1]->clientChannels.push_back(trim(channelName, "&#"));
 			printFd(_pollfds[fdIndex].fd, "Joined channel: " + channelName, GREEN);
 		}
 		else

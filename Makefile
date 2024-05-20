@@ -13,7 +13,8 @@ FILES		= 	./main \
 				./commands/PASS \
 				./commands/NICK \
 				./commands/USER \
-				./commands/JOIN 
+				./commands/JOIN \
+				./commands/KICK 
 
 SRC			= $(FILES:=.cpp)
 OBJ			= $(addprefix $(OBJDIR)/, $(FILES:=.o))
