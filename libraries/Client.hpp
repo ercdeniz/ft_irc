@@ -20,7 +20,6 @@ class Client
         int _fd;
         
     public:
-        vector<string> channelNames;
         Client() : _username(""), _nickname(""), _hasPass(false), _isNc(true), _isActive(true), _fd(-1) {}
         void setUsername(string username) { _username = username; }
         string getUsername() const { return _username; }

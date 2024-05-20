@@ -102,7 +102,7 @@ void Server::start()
 	while (true)
 	{
 		if (_clientCount == 0)
-			wait = 15000;
+			wait = 5000;
 		else
 			wait = -1;
 		status = poll(_pollfds, MAX_CLIENTS, wait);

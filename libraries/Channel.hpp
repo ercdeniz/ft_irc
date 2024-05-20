@@ -11,7 +11,7 @@ private:
 
 public:
     vector<Client*> _channelClients;
-    Channel(string channelName, string channelPassword = "", int limit = -1)
+    Channel(string channelName, string channelPassword, int limit = -1)
         : _channelName(channelName), _channelPassword(channelPassword), _limit(limit) {}
     string getChannelName() const { return _channelName; }
     void setChannelName(string channelName) { _channelName = channelName; }

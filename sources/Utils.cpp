@@ -29,7 +29,8 @@ void Server::sendMessage(int index)
 	printFd(_pollfds[index].fd, "Server shutting down...", RED);
 }
 
-string Server::trim(const string& str, const string& whitespaces = " \t\n\r\f\v\"\'") {
+string Server::trim(const string &str, const string &whitespaces = " \t\n\r\f\v\"\'")
+{
 	if (str.empty())
 		return str;
 	size_t firstNonSpace = str.find_first_not_of(whitespaces);
@@ -39,35 +40,51 @@ string Server::trim(const string& str, const string& whitespaces = " \t\n\r\f\v\
 	return str.substr(firstNonSpace, lastNonSpace - firstNonSpace + 1);
 }
 
+int ft_wordcount(const string &s, char c)
+{
+	unsigned int index = 0;
+	size_t i = 0;
+	while (i < s.length())
+	{
+		if (s[i] == c)
+			i++;
+		else
+		{
+			while (i < s.length() && s[i] != c)
+				i++;
+			index++;
+		}
+	}
+	return index;
+}
+
+int ft_wordlen(const string &s, char c, size_t start)
+{
+	int len = 0;
+	while (start < s.length() && s[start] != c)
+	{
+		len++;
+		start++;
+	}
+	return len;
+}
+
 vector<string> Server::splitString(const string &str, char delimiter)
 {
-	vector<string> tokens;
-	string token;
-	int count = 0;
-	bool inQuotes = false;
-	bool validQuotes = true;
+	vector<string> result;
+	size_t j = 0;
+	size_t word_count = ft_wordcount(str, delimiter);
 
-	for (size_t i = 0; i <= str.length(); i++)
+	while (result.size() < word_count)
 	{
-		if (str[i] == '"')
-		{
-			inQuotes = !inQuotes;
-			count++;
-			validQuotes = false;
-			if (count % 2 == 0)
-				validQuotes = true;
-		}
-		else if ((str[i] == delimiter || i == str.length()) && !inQuotes && validQuotes)
-		{
-			tokens.push_back(token);
-			token.clear();
-		}
-		else
-			token += str[i];
+		while (j < str.length() && str[j] == delimiter)
+			j++;
+		int len = ft_wordlen(str, delimiter, j);
+		if (len > 0)
+			result.push_back(str.substr(j, len));
+		j += len;
 	}
-	if (!validQuotes)
-		throw invalid_argument("Invalid number of quotes");
-	return tokens;
+	return result;
 }
 
 string Server::toUpper(const string &str)
