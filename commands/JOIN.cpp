@@ -36,9 +36,20 @@ void mapper(const string &channelStr, const string &keyStr, multimap<string, str
 	for (size_t i = 0; i < channels.size(); ++i)
 	{
 		string channel = channels[i];
-		string key =  keys[i];
+		string key = keys[i];
 		channelKeyMap.insert(pair<string, string>(channel, key));
 	}
+}
+
+bool hasChannel(const string &channelName, const vector<Channel> &channels, int *index)
+{
+	for (size_t i = 0; i < channels.size(); ++i)
+		if (!channels[i].getChannelName().compare(channelName))
+		{
+			*index = i;
+			return true;
+		}
+	return false;
 }
 
 void Server::JOIN(int fdIndex, vector<string> args)
@@ -65,26 +76,28 @@ void Server::JOIN(int fdIndex, vector<string> args)
 			errorMessages.push_back("Channel name must start with '#' or '&'");
 		if (channelName.find(' ') != string::npos || channelName.find(',') != string::npos || channelName.find('\a') != string::npos)
 			errorMessages.push_back("Channel name cannot contain ' ', ',' or '\\a'");
-		for (size_t i = 0; i < _channels.size(); ++i)
-			if (!_channels[i].getChannelName().compare(channelName))
-			{
-				if (_channels[i].getChannelPassword().compare(it->second))
-					errorMessages.push_back("Wrong password: " + channelName);
-				for (size_t j = 0; j < _channels[i]._channelClients.size(); ++j)
-					if (_channels[i]._channelClients[j] == clients[fdIndex - 1])
-						errorMessages.push_back("Already joined: " + channelName);
-				if (_channels[i].getLimit() != -1 && _channels[i]._channelClients.size() >= size_t(_channels[i].getLimit()))
-					errorMessages.push_back("Channel is full: " + channelName);
-			}
-		if (errorMessages.size() > 0)
+		int index = -1;
+		if (_channels.size() != 0 && hasChannel(channelName, _channels, &index))
 		{
-			printFd(_pollfds[fdIndex].fd, "Error(s) occurred while joining channel", RED);
-			for (size_t i = 0; i < errorMessages.size(); ++i)
-				printFd(_pollfds[fdIndex].fd, "  " + errorMessages[i], RED);
-			return;
+			if (_channels[index].getChannelPassword().compare(it->second))
+				errorMessages.push_back("Wrong password: " + channelName);
+			if (_channels[index]._channelClients[fdIndex - 1] == clients[fdIndex - 1])
+				errorMessages.push_back("Already joined: " + channelName);
+			if (_channels[index].getLimit() != -1 && _channels[index]._channelClients.size() >= size_t(_channels[index].getLimit()))
+				errorMessages.push_back("Channel is full: " + channelName);
 		}
-		_channels.push_back(Channel(channelName, it->second));
-		_channels[_channels.size() - 1]._channelClients.push_back(clients[fdIndex - 1]);
-		printFd(_pollfds[fdIndex].fd, "Joined channel: " + channelName, GREEN);
+		if (errorMessages.size() == 0)
+		{
+			_channels.push_back(Channel(channelName, it->second));
+			_channels[_channels.size() - 1]._channelClients.push_back(clients[fdIndex - 1]);
+			printFd(_pollfds[fdIndex].fd, "Joined channel: " + channelName, GREEN);
+		}
+	}
+	if (errorMessages.size() > 0)
+	{
+		printFd(_pollfds[fdIndex].fd, "Error(s) occurred while joining channel", RED);
+		for (size_t i = 0; i < errorMessages.size(); ++i)
+			printFd(_pollfds[fdIndex].fd, "  " + errorMessages[i], RED);
+		return;
 	}
 }
