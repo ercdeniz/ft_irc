@@ -92,6 +92,7 @@ void Server::JOIN(int fdIndex, vector<string> args)
 		bool existsInClient = hasInclude(trim(channelName, "&#"), clients[fdIndex - 1]->clientChannels);
 		if (_channels.size() != 0 && hasChannel(channelName, _channels, &index)) // channel exists
 		{
+			cout << "Channel exists" << endl;
 			if (_channels[index].getLimit() != -1 && _channels[index]._channelClients.size() >= size_t(_channels[index].getLimit()))
 				errorMessages.push_back("Channel is full");
 			if (_channels[index].getChannelPassword().compare(it->second))
@@ -101,6 +102,7 @@ void Server::JOIN(int fdIndex, vector<string> args)
 			else
 			{
 				clients[fdIndex - 1]->clientChannels.push_back(trim(channelName, "&#"));
+				_channels[index]._channelClients.push_back(clients[fdIndex - 1]);
 				printFd(_pollfds[fdIndex].fd, "Joined channel: " + channelName, GREEN);
 				return;
 			}
