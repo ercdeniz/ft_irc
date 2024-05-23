@@ -58,7 +58,7 @@ void printlnErr(const T &variable , int color = WHITE)
 
 template <typename T>
 void printFd(int fd, const T &variable, int color = WHITE)
-{
-    string message = COLORS[color] + convertString(variable) + RESET + '\n';
+{   
+    string message = convertString(variable) + "\r\n";
     send(fd, message.c_str(), message.length(), 0);
 }

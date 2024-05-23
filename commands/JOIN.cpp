@@ -92,7 +92,6 @@ void Server::JOIN(int fdIndex, vector<string> args)
 		bool existsInClient = hasInclude(trim(channelName, "&#"), clients[fdIndex - 1]->clientChannels);
 		if (_channels.size() != 0 && hasChannel(channelName, _channels, &index)) // channel exists
 		{
-			cout << "Channel exists" << endl;
 			if (_channels[index].getLimit() != -1 && _channels[index]._channelClients.size() >= size_t(_channels[index].getLimit()))
 				errorMessages.push_back("Channel is full");
 			if (_channels[index].getChannelPassword().compare(it->second))
@@ -103,22 +102,27 @@ void Server::JOIN(int fdIndex, vector<string> args)
 			{
 				clients[fdIndex - 1]->clientChannels.push_back(trim(channelName, "&#"));
 				_channels[index]._channelClients.push_back(clients[fdIndex - 1]);
-				printFd(_pollfds[fdIndex].fd, "Joined channel: " + channelName, GREEN);
+				printFd(_pollfds[fdIndex].fd, RPL_JOIN(clients[fdIndex - 1]->getNickname(), channelName));
+				cout << RPL_JOIN(clients[fdIndex - 1]->getNickname(), channelName) << endl;
 				return;
 			}
 		}
+		cout << "size: " << errorMessages.size() << endl;
 		if (errorMessages.size() == 0) // channel does not exist
 		{
 			_channels.push_back(Channel(channelName, it->second));
 			_channels[_channels.size() - 1]._channelClients.push_back(clients[fdIndex - 1]);
 			clients[fdIndex - 1]->clientChannels.push_back(trim(channelName, "&#"));
-			printFd(_pollfds[fdIndex].fd, "Joined channel: " + channelName, GREEN);
+			printFd(_pollfds[fdIndex].fd, RPL_JOIN(clients[fdIndex - 1]->getNickname(), channelName));
+			printFd(_pollfds[fdIndex].fd, RPL_NAMREPLY(clients[fdIndex - 1]->getNickname(), channelName, clients[fdIndex - 1]->getNickname()));
+			printFd(_pollfds[fdIndex].fd, RPL_ENDOFNAMES(clients[fdIndex - 1]->getNickname(), channelName));
+			cout << RPL_JOIN(clients[fdIndex - 1]->getNickname(), channelName) << endl;
 		}
 		else
 		{
 			printFd(_pollfds[fdIndex].fd, "Error(s) occurred while joining channel: " + channelName, RED);
 			for (size_t i = 0; i < errorMessages.size(); ++i)
-				printFd(_pollfds[fdIndex].fd, " ~> " + errorMessages[i], RED);
+				printFd(_pollfds[fdIndex].fd, RPL_JOIN(clients[fdIndex - 1]->getNickname(), channelName));
 			errorMessages.clear();
 		}
 	}

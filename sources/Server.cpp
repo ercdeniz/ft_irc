@@ -102,7 +102,7 @@ void Server::start()
 	while (true)
 	{
 		if (_clientCount == 0)
-			wait = 5000;
+			wait = 15000;
 		else
 			wait = -1;
 		status = poll(_pollfds, MAX_CLIENTS, wait);
@@ -136,9 +136,9 @@ void Server::handleCommand(int fdIndex, char *buf)
 	if (args.empty())
 		return;
 	// bunu en son sil
-	clients[fdIndex - 1]->setHasPass(true);
+/* 	clients[fdIndex - 1]->setHasPass(true);
 	clients[fdIndex - 1]->setNickname("nick");
-	clients[fdIndex - 1]->setUsername("user");
+	clients[fdIndex - 1]->setUsername("user"); */
 
 	string command = toUpper(args[0]);
 	if (!command.compare("PASS"))
@@ -164,7 +164,10 @@ void Server::otherCommands(int fdIndex, vector<string> args)
 {
 	string command = toUpper(args[0]);
 	if (!command.compare("JOIN"))
+	{
+		cout << "joine girdi" << endl;
 		JOIN(fdIndex, args);
+	}
 	else if (!command.compare("KICK"))
 		KICK(fdIndex, args);
 }
