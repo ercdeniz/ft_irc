@@ -160,6 +160,28 @@ void Server::initFds()
     FD_SET(socket_fd, &_readFds);
 }
 
+void Server::writeEvent()
+{
+    for (cliIt it = _clients.begin(); it != _clients.end(); ++it)
+    {
+        if (FD_ISSET(it->_clientFd, &_writeFdsSup))
+        {
+            int writed = write(it->_clientFd, it->_messageBox[0].c_str(), it->_messageBox[0].size());
+            it->_messageBox.erase(it->_messageBox.begin());
+            if (it->_messageBox.empty())
+                FD_CLR(it->_clientFd, &_writeFds);
+            if (writed <= 0)
+            {
+                std::vector<std::string> tmp;
+                tmp.push_back("");
+                (this->*_commands["QUIT"])(tmp, *it);
+            }
+            break ;
+        }
+    }
+}
+
+
 void Server::run()
 {
     int state = 0;
@@ -177,6 +199,11 @@ void Server::run()
             recvData(&state);
             if (state == 0)
                 continue;
+        }
+        if (state) {
+            writeEvent();
+            state = 0;
+            continue;
         }
     }
 }

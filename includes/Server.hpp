@@ -92,6 +92,7 @@ class Server
         void printStatus();
         void acceptRequest();
         void recvData(int*);
+        void writeEvent();
         void initFds();
         void initCommands();
         void run();
