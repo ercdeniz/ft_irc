@@ -2,3 +2,4 @@ ircserv
 .vscode
 .objFiles
 *.dSYM
+.DS_Store
