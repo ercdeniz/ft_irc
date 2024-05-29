@@ -1,5 +1,27 @@
 #include "../includes/Server.hpp"
 
+/**
+ * @brief Kanal Konusunu Değiştirme veya Görüntüleme İşlevi
+ *
+ * TOPIC komutu, bir kanalın konusunu değiştirmek veya görüntülemek için
+ * kullanılır. Eğer <topic> belirtilmemişse, kanal için <channel> konusu
+ * döndürülür. Eğer <topic> parametresi mevcutsa, kanal modları bu eylemi
+ * izin veriyorsa, o kanalın konusu değiştirilir.
+ *
+ * Komut: TOPIC
+ * Parametreler: <channel> [<topic>]
+ * Sayısal Yanıtlar:
+ * - RPL_NOTOPIC: Kanalda henüz bir konu belirlenmediğinde.
+ * - RPL_TOPIC: Kanalın mevcut konusu sorgulandığında.
+ * - ERR_NEEDMOREPARAMS: Yetersiz parametre sağlandığında.
+ * - ERR_CHANOPRIVSNEEDED: Kanal modları bu eyleme izin vermiyorsa.
+ * - ERR_NOSUCHCHANNEL: Belirtilen kanal mevcut değilse.
+ * Örnekler:
+ * - TOPIC #channel: #channel kanalının mevcut konusunu sorgular.
+ * - TOPIC #channel New topic: #channel kanalının konusunu "New topic" olarak değiştirir.
+ */
+
+
 std::string getTopic(std::vector<std::string>& params)
 {
     std::string ret = "";

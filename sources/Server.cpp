@@ -12,6 +12,7 @@ void Server::initCommands()
     _commands["PRIVMSG"] = &Server::Privmsg;
     _commands["NOTICE"] = &Server::Notice;
     _commands["KICK"] = &Server::Kick;
+    _commands["INVITE"] = &Server::Invite;
     _commands["MODE"] = &Server::Mode;
     _commands["WHO"] = &Server::Who;
     _commands["TOPIC"] = &Server::Topic; 

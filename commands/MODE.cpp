@@ -1,5 +1,34 @@
 #include "../includes/Server.hpp"
-#include <algorithm>
+
+/**
+ * @brief Kullanıcı ve Kanal Modlarını Değiştirme İşlevi
+ *
+ * MODE komutu, IRC'de hem kullanıcı adlarının hem de kanalların modlarının
+ * değiştirilmesine olanak tanıyan çift amaçlı bir komuttur. Bu komut, kanal
+ * operatörlerinin kanallarının özelliklerini değiştirmesine imkan tanır. Aynı
+ * zamanda, sunucuların kanal modlarını değiştirebilmesi ve kanal operatörlerinin
+ * oluşturulabilmesi gerekmektedir.
+ *
+ * Komut: MODE
+ * Parametreler: <channel> {[+|-]|o|p|s|i|t|n|b|v} [<limit>] [<user>] [<ban mask>]
+ * Sayısal Yanıtlar:
+ * - RPL_MODE: Mod değişikliği başarılı bir şekilde gerçekleştiğinde.
+ * - ERR_UNKNOWNMODE: Belirtilen mod tanımlanamadığında.
+ * - ERR_NEEDMOREPARAMS: Yetersiz parametre sağlandığında.
+ * - ERR_CHANOPRIVSNEEDED: Kullanıcının yeterli yetkiye sahip olmadığı durumlarda..
+ * - ERR_NOSUCHCHANNEL: Belirtilen kanal mevcut değilse.
+ * 
+ * Kanal Modları:
+ * - o: Kanal operatörü yetkisi ver/al
+ * - l: Kanal kullanıcı limitini belirleme
+ * - k: Kanal anahtarı (şifre) belirleme
+ *
+ * Örnekler:
+ *
+ * - MODE #channel +o Wiz: Wiz kullanıcısına #channel'da operatör yetkisi verir.
+ * - MODE #channel +k password: #channel'da kullanıcıları password anahtarı ile sınırlar.
+ * - MODE #channel +l 50: #channel'da kullanıcı sayısını 50 ile sınırlar.
+ */
 
 void Server::Mode(std::vector<std::string>& params, Client& cli)
 {

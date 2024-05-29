@@ -1,5 +1,41 @@
 #include "../includes/Server.hpp"
 
+/**
+ * @brief Kullanıcı Bilgilerini Belirtme İşlevi
+ *
+ * USER mesajı, bir bağlantının başlangıcında, yeni bir kullanıcının kullanıcı adını,
+ * ana bilgisayar adını, sunucu adını ve gerçek adını belirtmek için kullanılır.
+ * Ayrıca, sunucular arası iletişimde IRC'ye yeni gelen bir kullanıcıyı belirtmek
+ * için de kullanılır, çünkü bir istemciden NICK ve USER mesajları alındıktan sonra
+ * kullanıcı kaydedilir.
+ * 
+ * Sunucular arası USER mesajı, istemcinin NICK adı ile öncelenmelidir. Ana bilgisayar
+ * adı ve sunucu adı, doğrudan bağlı bir istemciden USER komutu geldiğinde (güvenlik
+ * nedenleriyle) IRC sunucusu tarafından normalde yok sayılır, ancak sunucu arası
+ * iletişimde kullanılır. Bu, bir yeni kullanıcının ağın geri kalanına tanıtıldığında
+ * eşlik eden USER gönderilmeden önce, bir NICK'in her zaman uzak bir sunucuya gönderilmesi
+ * gerektiği anlamına gelir.
+ * 
+ * Gerçek ad parametresinin, son parametre olması gerektiği unutulmamalıdır, çünkü
+ * içerisinde boşluk karakterleri bulunabilir ve bunun bir önek olarak tanınması için
+ * bir iki nokta üst üste (':') ile öneklenmelidir.
+ * 
+ * Yalnızca USER mesajına dayanarak bir istemcinin kullanıcı adı hakkında yalan söylemesi
+ * kolay olduğundan, bir "Kimlik Sunucusu"nun kullanılması önerilir. Kullanıcının
+ * bağlandığı ana bilgisayarın bu tür bir sunucusu etkinleştirilmişse, kullanıcı adı,
+ * "Kimlik Sunucusu"ndan gelen yanıtta belirtildiği gibi ayarlanır.
+ *
+ * Komut: USER
+ * Parametreler: <username> <hostname> <servername> :<realname>
+ * Sayısal Yanıtlar:
+ * - ERR_ALREADYREGISTRED: İstemci zaten kayıtlıysa.
+ * - ERR_NEEDMOREPARAMS: Yetersiz parametre sağlandığında.
+ *
+ * Örnekler:
+ * - USER guest 0 0 :Guest User: Yeni bir kullanıcının bilgilerini belirtir.
+ */
+
+
 void Server::User(std::vector<std::string>& params, Client& cli)
 {
     if (cli._isCap == NC && !passChecker(cli))

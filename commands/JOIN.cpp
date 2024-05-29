@@ -7,6 +7,15 @@
  * belirli kurallara göre oluşturulmalı ve kullanıcılar bu kanallara katılmak
  * istediklerinde JOIN komutunu kullanmalıdırlar.
  *
+ * Komut: JOIN
+ * Parametreler: <kanal adı> [<anahtar>]
+ * Sayısal Yanıtlar:
+ * - RPL_JOIN: Kanala başarıyla katıldığında.
+ * - ERR_NEEDMOREPARAMS: Komut için yeterli parametre girilmediğinde.
+ * - ERR_INVCHANNAME: Geçersiz kanal adı girildiğinde.
+ * - ERR_BADCHANNELKEY: Yanlış kanal anahtarı girildiğinde.
+ * - ERR_CHANNELISFULL: Kanalın kapasitesi dolu olduğunda.
+ * 
  * Kanal adları, en fazla 200 karakter uzunluğunda karakter dizileridir ve
  * '&' veya '#' karakterleri ile başlar. Kanal adlarında boşluk (' '), kontrol
  * G (^G veya ASCII 7 <\a>), veya virgül (',') karakterleri bulunmamalıdır.

@@ -1,5 +1,30 @@
 #include "../includes/Server.hpp"
 
+/**
+ * @brief Oturumu Sonlandırma İşlevi
+ *
+ * QUIT komutu, bir istemci oturumunu sonlandırmak için kullanılır. Sunucu, QUIT
+ * mesajı gönderen bir istemciye bağlantıyı kapatmalıdır. Eğer bir "Çıkış
+ * Mesajı" belirtilmişse, bu, varsayılan mesaj olan takma adı yerine gönderilecektir.
+ * Netsplitler (iki sunucunun bağlantısının kesilmesi) meydana geldiğinde, çıkış
+ * mesajı, iki sunucunun adı arasında bir boşlukla ayrılmış şekilde oluşturulur.
+ * İlk ad, hala bağlı olan sunucunun adıdır ve ikinci ad, bağlantısı kesilen
+ * sunucunun adıdır. Başka bir nedenle, bir istemci bağlantısı QUIT komutu
+ * göndermeden kapatılırsa (örneğin, istemci ölür ve soket üzerinde EOF
+ * oluşursa), sunucu, oluşmasına neden olan olayın doğasını yansıtan bir
+ * mesajla çıkış mesajını doldurmak zorundadır.
+ *
+ * Komut: QUIT
+ * Parametreler: [<Quit Message>]
+ * Sayısal Yanıtlar:
+ * - RPL_QUIT: Kullanıcı başarıyla çıkış yaptığında.
+ *
+ * Örnekler:
+ * - QUIT : Kullanıcı, varsayılan mesajla çıkış yapar.
+ * - QUIT :Client quit unexpectedly: Kullanıcı, "Client quit unexpectedly" mesajıyla çıkış yapar.
+ */
+
+
 void Server::Quit(std::vector<std::string>& params, Client& cli)
 {
     if (params[0] == "")

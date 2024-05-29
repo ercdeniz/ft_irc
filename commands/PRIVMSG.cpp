@@ -1,5 +1,35 @@
 #include "../includes/Server.hpp"
 
+/**
+ * @brief Özel Mesaj Gönderme İşlevi
+ *
+ * PRIVMSG komutu, kullanıcılar arasında özel mesaj göndermek için kullanılır.
+ * <receiver>, mesajın alıcısının takma adıdır. <receiver>, virgüllerle
+ * ayrılmış bir isim veya kanal listesi de olabilir.
+ * 
+ * <receiver> parametresi ayrıca bir host maskesi (#mask) veya sunucu maskesi
+ * ($mask) de olabilir. Her iki durumda da sunucu, maskeye uyan bir sunucu veya
+ * ana bilgisayara sahip olanlara sadece PRIVMSG gönderir. Maske en az bir (1)
+ * "." içermeli ve son "."'den sonraki joker karakterleri içermemelidir. Bu
+ * gereklilik, "#*" veya "$*" gibi tüm kullanıcılara yayın yapılmasını önlemek
+ * içindir; tecrübelerden, bu sorumlulukla ve doğru bir şekilde kullanıldığından
+ * daha fazla kötüye kullanılmıştır. Joker karakterleri '*', '?' karakterleridir.
+ * Bu PRIVMSG komutuna ek, yalnızca Operatörlere özeldir.
+ *
+ * Komut: PRIVMSG
+ * Parametreler: <receiver> <message>
+ * Sayısal Yanıtlar:
+ * - RPL_PRIVMSG: Mesaj başarıyla gönderildiğinde.
+ * - ERR_NOSUCHNICK: Belirtilen kullanıcı bulunamadığında.
+ * - ERR_NOSUCHCHANNEL: Belirtilen kanal bulunamadığında.
+ * - ERR_NEEDMOREPARAMS: Yetersiz parametre sağlandığında.
+ *
+ * Örnekler:
+ * - PRIVMSG Wiz :Hello, are you there?: Wiz kullanıcısına "Hello, are you there?" mesajını gönderir.
+ * - PRIVMSG #channel :Hi everyone!: #channel kanalına "Hi everyone!" mesajını gönderir.
+ */
+
+
 void Server::toChannel(std::vector<std::string>& params, Client& cli)
 {
     if (params[0] == "#bot")

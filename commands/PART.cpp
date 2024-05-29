@@ -1,5 +1,25 @@
 #include "../includes/Server.hpp"
 
+/**
+ * @brief Kanaldan Ayrılma İşlevi
+ *
+ * PART mesajı, gönderen istemcinin, parametre olarak verilen kanalların
+ * listesinden çıkarılmasına neden olur. Kanaldan çıkma, istemcinin aktif
+ * kullanıcı listesinden çıkarılması anlamına gelir.
+ *
+ * Komut: PART
+ * Parametreler: <channel>{,<channel>} [<reason>]
+ * Sayısal Yanıtlar:
+ * - RPL_PART: Kanaldan başarıyla ayrıldığında.
+ * - ERR_NEEDMOREPARAMS: Yetersiz parametre sağlandığında.
+ * - ERR_NOSUCHCHANNEL: Belirtilen kanal mevcut değilse.
+ *
+ * Örnekler:
+ *
+ * - PART #channel1: Kullanıcı, #channel1 kanalından ayrılır.
+ */
+
+
 void Server::Part(std::vector<std::string>& params, Client& cli)
 {
     if (!passChecker(cli))

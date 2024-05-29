@@ -1,5 +1,29 @@
 #include "../includes/Server.hpp"
 
+/**
+ * @brief Kullanıcıyı Kanaldan Atma İşlevi
+ *
+ * Bu işlev, bir kullanıcıyı zorla bir kanaldan çıkarmak için kullanılır.
+ * Sadece kanal operatörleri, başka bir kullanıcıyı kanaldan atabilir. Her
+ * KICK mesajı alan sunucu, göndericinin gerçekten kanal operatörü olduğunu
+ * doğrular ve ardından kullanıcıyı kanaldan çıkarır.
+ *
+ * Komut: KICK
+ * Parametreler: <channel> <user> [<comment>]
+ * Sayısal Yanıtlar:
+ * - RPL_KICK: Kullanıcı başarıyla kanaldan atıldığında.
+ * - RPL_ENDOFNAMES: Kanaldaki kullanıcı listesinin sonu.
+ * - ERR_NEEDMOREPARAMS: Yetersiz parametre sağlandığında.
+ * - ERR_NOSUCHCHANNEL: Belirtilen kanal mevcut değilse.
+ * - ERR_CHANOPRIVSNEEDED: Kullanıcının yeterli yetkiye sahip olmadığı durumlarda.
+ * - ERR_CHANOPKICK: Kanal operatörü, kendisini kanaldan atamaz.
+ * Örnekler:
+ *
+ * - :Angel KICK #Dust Wiz: Angel kullanıcısı, Wiz'i #Dust kanalından atar.
+ * - KICK #Twilight_Zone Wiz: Wiz'i #Twilight_Zone kanalından atar.
+ */
+
+
 void Server::Kick(std::vector<std::string> &params, Client &cli)
 {
     if (!passChecker(cli))

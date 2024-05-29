@@ -18,7 +18,7 @@
 #define RPL_NAMREPLY(nick, channel, users)			": 353 " + nick + " = " + channel + " :" + users + "\r\n"
 #define RPL_ENDOFNAMES(nick, channel)				": 366 " + nick + " " + channel + " :End of /NAMES list\r\n"
 #define RPL_TOPIC(nick, ip, channel, topic)			":" + nick + "!" + nick + "@" + ip + " TOPIC " + channel + " :" + topic + "\r\n"       
-
+#define RPL_INVITE(nick, ip, channel, target)       ":" + nick + "!" + nick + "@" + ip + " INVITE " + target + " " + channel + "\r\n"
 #define RPL_PRIVMSG(source, target, message)		":" + source + " PRIVMSG " + target + " :" + message + "\r\n"
 #define RPL_NOTICE(source, target, message)			":" + source + " NOTICE " + target + " :" + message + "\r\n"
 #define RPL_NICK(nick, user, ip, newnick)			":" + nick + "!" + user + "@" + ip + " NICK :" + newnick + "\r\n"
@@ -76,7 +76,6 @@ class Server
         std::vector<Client> _clients;
         // methods
 	
-
         std::map<std::string, std::vector<std::string> > getParams(std::string const& str);
         void showRightGui(Client &cli, Channel &cha);
         int isNickExist(std::string const&);
@@ -120,6 +119,7 @@ class Server
         void Kick(std::vector<std::string>&, Client&);
         void Topic(std::vector<std::string>&, Client&);
         void Notice(std::vector<std::string>&, Client&);
+        void Invite(std::vector<std::string>&, Client&);
         void Who(std::vector<std::string>&, Client& cli);
         void Bot(Client& client, int flag);
 

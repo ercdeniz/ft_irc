@@ -5,6 +5,7 @@ SRC				=	main.cpp \
 					Utils.cpp \
 					UtilsServer.cpp \
 					CAP.cpp \
+					INVITE.cpp \
 					JOIN.cpp \
 					KICK.cpp \
 					MODE.cpp \
@@ -46,28 +47,23 @@ $(NAME): $(OBJDIR) $(OBJ)
 	@if [ "$(GITIGNORE_EXISTS)" = "no" ]; then \
 		echo $(NAME) >> $(GITIGNORE_PATH); \
 	fi
+	@clear
 	@$(ECHO) "\033[0;32m> $(NAME) Compiled\033[0m"
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR)
 	@$(CC) $(CXXFLAGS) -c -o $@ $< \
-	&& $(ECHO) "\033[1;30m[C++] : Compiled $(notdir $<) \
-	[\033[0;32mOk\033[1;30m]\033[0m" \
-	|| $(ECHO) "\033[1;30m[C++] : Compiled $(notdir $<) \
-	[\033[0;7;31mError\033[0;1;30m]\033[0m"
+	&& $(ECHO) "$(notdir $<) \033[2;92mCompiled\033 \033[0m ✅" \
+	|| $(ECHO) "\033[0;31m$(notdir $<) \033[0;7;31mCompile Failed\033[0m ❌"
 
 $(OBJDIR)/%.o: $(SRCDIR_SOURCES)/%.cpp | $(OBJDIR)
 	@$(CC) $(CXXFLAGS) -c -o $@ $< \
-	&& $(ECHO) "\033[1;30m[C++] : Compiled $(notdir $<) \
-	[\033[0;32mOk\033[1;30m]\033[0m" \
-	|| $(ECHO) "\033[1;30m[C++] : Compiled $(notdir $<) \
-	[\033[0;7;31mError\033[0;1;30m]\033[0m"
+	&& $(ECHO) "$(notdir $<) \033[2;92mCompiled\033 \033[0m ✅" \
+	|| $(ECHO) "\033[0;31m$(notdir $<) \033[0;7;31mCompile Failed\033[0m ❌"
 
 $(OBJDIR)/%.o: $(SRCDIR_COMMANDS)/%.cpp | $(OBJDIR)
 	@$(CC) $(CXXFLAGS) -c -o $@ $< \
-	&& $(ECHO) "\033[1;30m[C++] : Compiled $(notdir $<) \
-	[\033[0;32mOk\033[1;30m]\033[0m" \
-	|| $(ECHO) "\033[1;30m[C++] : Compiled $(notdir $<) \
-	[\033[0;7;31mError\033[0;1;30m]\033[0m"
+	&& $(ECHO) "$(notdir $<) \033[2;92mCompiled\033 \033[0m ✅" \
+	|| $(ECHO) "\033[0;31m$(notdir $<) \033[0;7;31mCompile Failed\033[0m ❌"
 
 clean:
 	@$(RM) $(OBJDIR)

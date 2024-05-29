@@ -1,5 +1,34 @@
 #include "../includes/Server.hpp"
 
+/**
+ * @brief Kullanıcı Takma Adı Değiştirme İşlevi
+ *
+ * 
+ * NICK mesajı, kullanıcıya bir takma ad vermek veya önceki takma adını
+ * değiştirmek için kullanılır.
+ * 
+ * Bir NICK mesajı, başka bir istemci için zaten aynı takma adı bilen bir
+ * sunucuya ulaştığında, bir takma adı çakışması meydana gelir. Takma adı
+ * çakışması sonucunda, sunucunun veritabanından tüm takma adlarının örnekleri
+ * kaldırılır ve bir KILL komutu, takma adını tüm diğer sunucu veritabanlarından
+ * kaldırmak için gönderilir. Takma adı çakışmasına neden olan NICK mesajı bir
+ * takma adı değiştirme işlemiyse, o zaman orijinal (eski) takma ad da kaldırılmalıdır.
+ *
+ *
+ * Komut: NICK
+ * Parametreler: <newnick>
+ * Sayısal Yanıtlar:
+ * - ERR_NEEDMOREPARAMS: Komut için yeterli parametre girilmediğinde.
+ * - ERR_NONICKNAMEGIVEN: Yeni bir takma ad belirtilmediğinde.
+ * - ERR_NICKNAMEINUSE: Belirtilen takma adı zaten kullanımda olduğunda.
+ * - ERR_NICKNAMEEMPTY: Takma adı boş olduğunda.
+ *
+ * Örnekler:
+ *
+ * - NICK Wiz: Kullanıcının takma adını "Wiz" olarak değiştirir.
+ */
+
+
 int Server::CheckNickDepends(std::vector<std::string>& params, Client& cli)
 {
     if (cli._isCap == NC && !passChecker(cli))
