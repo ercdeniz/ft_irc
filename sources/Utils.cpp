@@ -25,11 +25,11 @@ std::string Server::intToString(int n)
 
 int Server::portIsValid(std::string const& port)
 {
-    for (size_t i = 0; i < port.size(); ++i) {
+    for (size_t i = 0; i < port.size(); ++i)
         if (!isdigit(port[i]))
             return 0;
-    }
-    if (atoi(port.c_str()) > 65535)
+	int portInt = std::atoi(port.c_str());
+    if (portInt < 1024 || portInt > 49151)
         return 0;
     return 1;
 }

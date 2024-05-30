@@ -212,7 +212,7 @@ void Server::run()
 void Server::createBot()
 {
     Client bot;
-    bot._nick = "bot";
+    bot._nick = "bombot";
     bot._user = "bot";
     bot._realName = "bot";
     bot._clientFd = 1;

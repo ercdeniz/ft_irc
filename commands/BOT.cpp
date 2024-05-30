@@ -44,7 +44,7 @@ void Server::Bot(Client &client, int flag)
         // Random number generator
         srand(time(0));
         int random = rand() % messages.size();
-
+        std::cout << "adasdasdasd: " << messages.size() << std::endl;
         // Send message to the channel
         params.push_back(client._nick);
         params.push_back(messages[random]);
