@@ -66,11 +66,10 @@ std::map<std::string, std::vector<std::string> > Server::getParams(const std::st
     std::map<std::string, std::vector<std::string> > ret;
     std::stringstream ss(str);
     std::string cmd;
-    ss >> cmd;
+    ss >> cmd; 
     cmd = toUpper(cmd);
     std::vector<std::string> params;
     std::string param;
-
     while (ss >> param)
     {
         if (_commands.find(param) != _commands.end())
@@ -89,10 +88,10 @@ std::map<std::string, std::vector<std::string> > Server::getParams(const std::st
 }
 
 
-
 void Server::commandHandler(std::string& str, Client& cli)
 {
     std::map<std::string, std::vector<std::string> > params = getParams(str);
+    std::cout << "Command: " << params.begin()->first << std::endl;
     for (std::map<std::string, std::vector<std::string> >::iterator it = params.begin(); it != params.end(); ++it)
     {
         std::string cmd = toUpper(it->first);
