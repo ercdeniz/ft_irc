@@ -91,7 +91,6 @@ std::map<std::string, std::vector<std::string> > Server::getParams(const std::st
 void Server::commandHandler(std::string& str, Client& cli)
 {
     std::map<std::string, std::vector<std::string> > params = getParams(str);
-    std::cout << "Command: " << params.begin()->first << std::endl;
     for (std::map<std::string, std::vector<std::string> >::iterator it = params.begin(); it != params.end(); ++it)
     {
         std::string cmd = toUpper(it->first);
