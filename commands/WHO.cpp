@@ -28,7 +28,7 @@ void Server::Who(std::vector<std::string>& params, Client& cli)
 {
     if (!passChecker(cli))
         return;
-    if (params.size() > 1)
+    if (params.size() != 1)
         return ;
     if (isChannelExist(params[0]) == false)
         Server::writeMessage(cli._clientFd,ERR_NOSUCHCHANNEL(params[0], cli._nick));

@@ -40,7 +40,7 @@ void Server::User(std::vector<std::string>& params, Client& cli)
 {
     if (cli._isCap == NC && !passChecker(cli))
         return;
-    if (params.size() < 4)
+    if (params.size() != 4)
         Server::writeMessage(cli._clientFd, ERR_NEEDMOREPARAMS(cli._nick, params[0]));
     else if (!cli._user.empty())
         Server::writeMessage(cli._clientFd, ERR_ALREADYREGISTRED);

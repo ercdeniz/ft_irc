@@ -34,7 +34,7 @@ void Server::Notice(std::vector<std::string>& params, Client& cli)
         Server::writeMessage(cli._clientFd, "Cannot notice a channel\r\n");
         return ;
     }
-    if (params.size() < 2) {
+    if (params.size() != 2) {
         Server::writeMessage(cli._clientFd, ERR_NEEDMOREPARAMS(cli._nick, "NOTICE"));
         return ;
     }

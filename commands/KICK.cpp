@@ -29,7 +29,7 @@ void Server::Kick(std::vector<std::string> &params, Client &cli)
     if (!passChecker(cli))
         return;
         
-    if (params.size() < 2)
+    if (params.size() != 2)
     {
         Server::writeMessage(cli._clientFd, ERR_NEEDMOREPARAMS(cli._nick, params[0]));
         return;
