@@ -34,9 +34,9 @@ int main(int ac, char **av)
 {
     try {
         if (ac != 3)
-            throw std::runtime_error("./ircserv <port> <password>");
+            throw std::invalid_argument("USAGE:\n./ircserv <port> <password>");
         if (!Server::portIsValid(av[1]))
-            throw std::runtime_error("invalid port");
+            throw std::invalid_argument("Invalid port number!\nMust be between 1024 and 49151.");
         server = new Server();
         signalCatcher();
         server->startServer(atoi(av[1]), av[2]);

@@ -25,23 +25,23 @@ void Server::createSocket(size_t const& port)
     struct sockaddr_in server_addr;
    
     if ((socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
-        throw std::runtime_error("Socket");
+        throw std::system_error(errno, std::system_category(), "Socket creation failed");
 
     fcntl(socket_fd, F_SETFL, O_NONBLOCK); 
 
     if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int)) < 0) 
-        throw std::runtime_error("Setsockopt");
+        throw std::system_error(errno, std::system_category(), "Setsockopt failed");
 
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_addr.s_addr = INADDR_ANY; 
     server_addr.sin_family = AF_INET; 
     server_addr.sin_port = htons(port);
 
-    if (::bind(socket_fd, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
-        throw std::runtime_error("Bind"); 
+    if (bind(socket_fd, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
+        throw std::system_error(errno, std::system_category(), "Bind failed");
   
     if (listen(socket_fd, SOMAXCONN) < 0)  
-        throw std::runtime_error("Listen"); 
+        throw std::system_error(errno, std::system_category(), "Listen failed");
 }
 void Server::acceptRequest() 
 {
@@ -52,7 +52,7 @@ void Server::acceptRequest()
     client_tmp._clientFd = accept(socket_fd, (sockaddr *)&client_addr, &client_size); 
     fcntl(client_tmp._clientFd, F_SETFL, O_NONBLOCK); 
     if (client_tmp._clientFd <= 0) 
-        throw std::runtime_error("Accept failed"); 
+        throw std::system_error(errno, std::system_category(), "Accept failed"); 
     client_tmp._port = ntohs(client_addr.sin_port); 
     inet_ntop(AF_INET, &(client_addr.sin_addr), client_tmp._ipAddr, INET_ADDRSTRLEN); 
     FD_SET(client_tmp._clientFd, &_readFds); 
@@ -61,48 +61,38 @@ void Server::acceptRequest()
     _clients.push_back(client_tmp); 
 }
 
-std::map<std::string, std::vector<std::string> > Server::getParams(std::string const& str)
+std::map<std::string, std::vector<std::string> > Server::getParams(const std::string& str)
 {
-    std::stringstream ss(str);
-    std::string tmp;
     std::map<std::string, std::vector<std::string> > ret;
-    std::vector<std::string> params;
-    ss >> tmp;
+    std::stringstream ss(str);
     std::string cmd;
-    while (1)
+    ss >> cmd;
+    cmd = toUpper(cmd);
+    std::vector<std::string> params;
+    std::string param;
+
+    while (ss >> param)
     {
-        cmd = tmp;
-        if (ret.find(cmd) != ret.end())
-            return ret;
-        params.clear();
-        ss >> tmp;
-        while (_commands.find(tmp) == _commands.end())
+        if (_commands.find(param) != _commands.end())
         {
-            params.push_back(tmp);
-            ss >> tmp;
-            if (ss.eof())
-            {
-                ret[cmd] = params;
-                return ret;
-            }
-        }
-        if (ss.eof())
-        {
-            params.push_back("");
+            if (params.empty())
+                params.push_back("");
             ret[cmd] = params;
             return ret;
         }
-        if (params.empty())
-            params.push_back(""); 
-        ret[cmd] = params;
+        params.push_back(param);
     }
+    if (params.empty())
+        params.push_back("");
+    ret[cmd] = params;
     return ret;
 }
+
+
 
 void Server::commandHandler(std::string& str, Client& cli)
 {
     std::map<std::string, std::vector<std::string> > params = getParams(str);
-
     for (std::map<std::string, std::vector<std::string> >::iterator it = params.begin(); it != params.end(); ++it)
     {
         std::string cmd = toUpper(it->first);
