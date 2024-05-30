@@ -164,6 +164,8 @@ void Server::writeEvent()
 {
     for (cliIt it = _clients.begin(); it != _clients.end(); ++it)
     {
+        if (it->_clientFd < 3)
+            continue;
         if (FD_ISSET(it->_clientFd, &_writeFdsSup))
         {
             int writed = write(it->_clientFd, it->_messageBox[0].c_str(), it->_messageBox[0].size());
