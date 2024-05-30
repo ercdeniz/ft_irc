@@ -61,43 +61,54 @@ void Server::acceptRequest()
     _clients.push_back(client_tmp); 
 }
 
-std::map<std::string, std::vector<std::string> > Server::getParams(const std::string& str)
+std::map<std::string, std::vector<std::string> > Server::getParams(std::string const& str)
 {
-    std::map<std::string, std::vector<std::string> > ret;
     std::stringstream ss(str);
-    std::string cmd;
-    ss >> cmd; 
-    cmd = toUpper(cmd);
+    std::string tmp;
+    std::map<std::string, std::vector<std::string> > ret;
     std::vector<std::string> params;
-    std::string param;
-    while (ss >> param)
+    ss >> tmp;
+    std::string cmd;
+    while (1)
     {
-        if (_commands.find(param) != _commands.end())
+        cmd = tmp;
+        if (ret.find(cmd) != ret.end())
+            return ret;
+        params.clear();
+        ss >> tmp;
+        while (_commands.find(tmp) == _commands.end())
         {
-            if (params.empty())
-                params.push_back("");
+            params.push_back(tmp);
+            ss >> tmp;
+            if (ss.eof())
+            {
+                ret[cmd] = params;
+                return ret;
+            }
+        }
+        if (ss.eof())
+        {
+            params.push_back("");
             ret[cmd] = params;
             return ret;
         }
-        params.push_back(param);
+        if (params.empty())
+            params.push_back(""); 
+        ret[cmd] = params;
     }
-    if (params.empty())
-        params.push_back("");
-    ret[cmd] = params;
     return ret;
 }
-
 
 void Server::commandHandler(std::string& str, Client& cli)
 {
     std::map<std::string, std::vector<std::string> > params = getParams(str);
+
     for (std::map<std::string, std::vector<std::string> >::iterator it = params.begin(); it != params.end(); ++it)
     {
-        std::string cmd = toUpper(it->first);
-        if (_commands.find(cmd) == _commands.end())
-            Server::writeMessage(cli._clientFd, "421 : " + cmd + " :Unknown command!\r\n");
+        if (_commands.find(it->first) == _commands.end())
+            Server::writeMessage(cli._clientFd, "421 : " + it->first + " :Unknown command!\r\n");
         else
-            (this->*_commands[cmd])(it->second, cli);
+            (this->*_commands[it->first])(it->second, cli);
     }
 }
 
