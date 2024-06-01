@@ -43,5 +43,10 @@ int main(int ac, char **av)
     } catch (std::exception& e) {
         printlnErr(e.what(), RED);
     }
+    if (server)
+    {
+        delete server;
+        server = NULL;
+    }
     return 0;
 }

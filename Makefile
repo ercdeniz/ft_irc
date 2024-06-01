@@ -67,11 +67,11 @@ $(OBJDIR)/%.o: $(SRCDIR_COMMANDS)/%.cpp | $(OBJDIR)
 
 clean:
 	@$(RM) $(OBJDIR)
-	@$(ECHO) "\033[0;34m> object directory cleaned\033[0m"
+	@$(ECHO) "\033[1;36m~> objects cleaned\033[0m 🚮"
 
 fclean:	clean
 	@$(RM) $(NAME)
-	@$(ECHO) "\033[0;35m> $(NAME) removed\033[0m"
+	@$(ECHO) "\033[1;31m~> $(NAME) removed\033[0m 🧹"
 
 re: fclean all
 

@@ -83,9 +83,9 @@ std::vector<std::string> Server::splitString(const std::string &str, char delimi
 
 std::string Server::toUpper(const std::string &str)
 {
-	std::string result = str;
-	transform(result.begin(), result.end(), result.begin(), ::toupper);
-	return result;
+    std::string result = str;
+    std::transform(result.begin(), result.end(), result.begin(), ::toupper);
+    return result;
 }
 
 std::vector<int> Channel::getFds() const
